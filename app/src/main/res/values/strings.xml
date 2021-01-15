@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Currency Converter</string>
+    <string name="valute_left_side">USD</string>
+    <string name="value_left">2.50</string>
+    <string name="value_right">183.75</string>
+    <string name="swap">Swap</string>
+    <string name="valute_right_side">RUB</string>
 </resources>

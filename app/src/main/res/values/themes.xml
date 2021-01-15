@@ -2,9 +2,9 @@
     <!-- Base application theme. -->
     <style name="Theme.CurrencyConverter" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryDark">@color/purple_700</item>
-        <item name="colorAccent">@color/teal_200</item>
+        <item name="colorPrimary">#607d8b</item>
+        <item name="colorPrimaryDark">#34515e</item>
+        <item name="colorAccent">#8eacbb</item>
         <!-- Customize your theme here. -->
     </style>
 </resources>
