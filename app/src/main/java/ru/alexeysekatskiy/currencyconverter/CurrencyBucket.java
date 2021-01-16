@@ -5,6 +5,15 @@ public class CurrencyBucket {
     private double value;
     private String name;
 
+    @Override
+    public String toString() {
+        return "CurrencyBucket{" +
+                "charCode='" + charCode + '\'' +
+                ", value=" + value +
+                ", name='" + name + '\'' +
+                '}';
+    }
+
     public CurrencyBucket(String charCode, double value, String name) {
         this.charCode = charCode;
         this.value = value;

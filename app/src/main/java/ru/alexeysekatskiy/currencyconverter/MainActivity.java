@@ -1,6 +1,7 @@
 package ru.alexeysekatskiy.currencyconverter;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -31,12 +32,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeCurrencyRight(View view) {
-//        Toast.makeText(getApplicationContext(), "Не реализовано", Toast.LENGTH_SHORT).show();
+        AsyncTask.execute(new XMLParser());
         Intent intent = new Intent(MainActivity.this, CurrencySelectionDialog.class);
         startActivity(intent);
     }
 
     public void changeCurrencyLeft(View view) {
+        Toast.makeText(getApplicationContext(), "Не реализовано", Toast.LENGTH_SHORT).show();
+    }
+
+    public void swap(View view) {
         Toast.makeText(getApplicationContext(), "Не реализовано", Toast.LENGTH_SHORT).show();
     }
 

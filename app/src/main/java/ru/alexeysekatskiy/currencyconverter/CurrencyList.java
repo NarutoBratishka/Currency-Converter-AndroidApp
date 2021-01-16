@@ -2,6 +2,9 @@ package ru.alexeysekatskiy.currencyconverter;
 
 import android.support.annotation.NonNull;
 
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.util.Arrays;
 import java.util.Iterator;
 
