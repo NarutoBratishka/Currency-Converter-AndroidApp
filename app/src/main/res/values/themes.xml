@@ -7,4 +7,13 @@
         <item name="colorAccent">#8eacbb</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="Theme.CurrencyConverter.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.CurrencyConverter.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.CurrencyConverter.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
