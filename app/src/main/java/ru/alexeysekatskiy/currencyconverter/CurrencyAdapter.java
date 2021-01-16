@@ -62,11 +62,6 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.Curren
                 @Override
                 public void onClick(View v) {
                     int position = getAdapterPosition();
-//                    @SuppressLint("DefaultLocale") String message = String.format("%.2f руб.", CurrencyList.get(position).getValue());
-//
-//                    Toast toast =  Toast.makeText(parent,
-//                            message, Toast.LENGTH_SHORT);
-//                    toast.show();
 
                     if (MainActivity.isRightActivity()) {
                         MainActivity.secondValute = CurrencyList.get(position);
@@ -74,7 +69,6 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.Curren
                         MainActivity.firstValute = CurrencyList.get(position);
                     }
 
-//                    changeCheckSym();
                 }
             });
         }

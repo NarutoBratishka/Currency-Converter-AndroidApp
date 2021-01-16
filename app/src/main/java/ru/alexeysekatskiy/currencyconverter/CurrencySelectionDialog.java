@@ -15,7 +15,6 @@ public class CurrencySelectionDialog extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.e(this.getClass().getSimpleName(), "До адаптера");  //////
         setContentView(R.layout.activity_selection_dialog);
 
         currencyListView = findViewById(R.id.currency_list_view);
