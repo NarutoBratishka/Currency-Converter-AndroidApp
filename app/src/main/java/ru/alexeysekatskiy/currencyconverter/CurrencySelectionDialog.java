@@ -1,16 +1,9 @@
 package ru.alexeysekatskiy.currencyconverter;
 
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.View;
-
-import org.xml.sax.XMLReader;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.sax2.Driver;
 
 public class CurrencySelectionDialog extends AppCompatActivity {
 

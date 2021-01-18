@@ -27,15 +27,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if (savedInstanceState == null) {
-
-        }
-
-
     }
 
     public void changeCurrencyRight(View view) {
+        rightSide = true;
         Intent intent = new Intent(MainActivity.this, CurrencySelectionDialog.class);
         startActivity(intent);
     }
@@ -51,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     public void hideKeyboard(View view) {
         manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-//        calculate(rightSide);
+//        calculateValute();
     }
 
     public static boolean isRightActivity() {
