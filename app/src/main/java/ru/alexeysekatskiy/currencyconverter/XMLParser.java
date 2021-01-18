@@ -52,8 +52,6 @@ public class XMLParser implements Runnable{
                 NodeList nodlistValue = element.getElementsByTagName("Value");
                 Element _value = (Element) nodlistValue.item(0);
 
-                // String resimURL =
-                // resim.getAttributes().getNamedItem("url").getNodeValue();
 
                 String charCode = _charCode.getChildNodes().item(0).getNodeValue();
                 double value = Double.parseDouble(_value.getChildNodes().item(0).getNodeValue().replace(',', '.'));
@@ -63,11 +61,8 @@ public class XMLParser implements Runnable{
 
                 CurrencyBucket temp = new CurrencyBucket(charCode, resultValue, name);
                 CurrencyList.add(temp);
-                Log.e("XMLParser", temp.toString());
-                //TODO
-            }
-            Log.e("XMLParser", String.valueOf(CurrencyList.size));
 
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
