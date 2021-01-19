@@ -23,7 +23,7 @@ public class CurrencySelectionDialog extends AppCompatActivity {
 
         currencyListView.setHasFixedSize(true);
 
-        adapter = new CurrencyAdapter(/*this*/);
+        adapter = new CurrencyAdapter();
         currencyListView.setAdapter(adapter);
     }
 }

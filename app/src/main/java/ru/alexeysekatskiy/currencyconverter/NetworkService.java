@@ -5,7 +5,7 @@ import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 public class NetworkService {
     private static NetworkService mInstance;
-    private final static String BASE_URL = "http://www.cbr.ru/scripts/XML_daily.asp";
+    private final static String BASE_URL = "http://www.cbr.ru";
     private Retrofit mRetrofit;
 
 
@@ -21,5 +21,9 @@ public class NetworkService {
             mInstance = new NetworkService();
         }
         return mInstance;
+    }
+
+    public CurrencyPlaceHolderApi getXmlApi() {
+        return mRetrofit.create(CurrencyPlaceHolderApi.class);
     }
 }

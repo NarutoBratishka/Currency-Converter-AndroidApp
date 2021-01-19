@@ -3,14 +3,24 @@ package ru.alexeysekatskiy.currencyconverter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.simpleframework.xml.Path;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getData();
     }
 
     public void changeCurrencyRight(View view) {
@@ -51,5 +62,46 @@ public class MainActivity extends AppCompatActivity {
 
     public static boolean isRightActivity() {
         return rightSide;
+    }
+
+    private void getData() {
+        NetworkService.getInstance()
+                .getXmlApi()
+//                .getAllPost()
+//                .enqueue(new Callback<List<Post>>() {
+//                    @Override
+//                    public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+//                        if (response.isSuccessful()) {
+//                            Log.e("Main-INFO-SUCCES", String.valueOf(response.body().size()));
+//                            List<Post> postList = response.body();
+//                            for (Post post : postList) {
+//                                Log.e("Main-INFO", post.getName());
+//                                Log.e("Main-INFO", post.getValue());
+//                            }
+//                        } else {
+//                            Log.e("Main-INFO-DENIED", String.valueOf(response.code()));
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call<List<Post>> call, Throwable t) {
+//                        Log.e("Main-EXCEPTION", t.getMessage());
+//                    }
+//                });
+
+                .getGeneralPost()
+                .enqueue(new Callback<Post>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Post> call,@NonNull Response<Post> response) {
+                        Post post = response.body();
+                        Log.e("Main-INFO", post.getName());
+                        Log.e("Main-INFO", post.getValue());
+                    }
+
+                    @Override
+                    public void onFailure(Call<Post> call, Throwable t) {
+                        Log.e("Main-EXCEPTION", t.getMessage());
+                    }
+                });
     }
 }
