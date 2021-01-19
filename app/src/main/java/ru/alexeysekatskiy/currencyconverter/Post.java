@@ -6,23 +6,23 @@ import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Transient;
 
 
-@Root(name = "ValCurs", strict = false)
+//@Root(name = "ValCurs", strict = false)
 public class Post {
 //    @Transient
-    @Path("Valute")
-    @Element(name = "NumCode", type = String.class)
+//    @Path("Valute")
+//    @Element(name = "NumCode", type = String.class)
     private String numCode;
-    @Path("Valute")
-    @Element(name = "CharCode", type = String.class)
+//    @Path("Valute")
+//    @Element(name = "CharCode", type = String.class)
     private String charCode;
-    @Path("Valute")
-    @Element(name = "Nominal", type = String.class)
+//    @Path("Valute")
+//    @Element(name = "Nominal", type = String.class)
     private String nominal;
-    @Path("Valute")
-    @Element(name = "Name", type = String.class)
+//    @Path("Valute")
+//    @Element(name = "Name", type = String.class)
     private String name;
-    @Path("Valute")
-    @Element(name = "Value", type = String.class)
+//    @Path("Valute")
+//    @Element(name = "Value", type = String.class)
     private String value;
 
 //    public double getNumCode() {

@@ -2,70 +2,77 @@ package ru.alexeysekatskiy.currencyconverter;
 
 import android.util.Log;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserFactory;
+import java.util.ArrayList;
+import java.io.StringReader;
 
-import java.net.URL;
+public class XMLParser {
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+    private ArrayList<Post> posts;
 
-public class XMLParser implements Runnable{
-
-    public XMLParser() {
-        super();
+    public XMLParser(){
+        posts = new ArrayList<>();
     }
 
-    public void run() {
+    public ArrayList<Post> getUsers(){
+        return  posts;
+    }
 
-        try {
+    public boolean parse(String xmlData){
+        boolean status = true;
+        Post currentPost = null;
+        boolean inEntry = false;
+        String textValue = "";
 
-            URL url = new URL("http://www.cbr.ru/scripts/XML_daily.asp");
+        try{
+            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            XmlPullParser xpp = factory.newPullParser();
 
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
-                    .newInstance();
-            DocumentBuilder documentBuilder = documentBuilderFactory
-                    .newDocumentBuilder();
-            Document document = documentBuilder.parse(new InputSource(url
-                    .openStream()));
+            xpp.setInput(new StringReader(xmlData));
+            int eventType = xpp.getEventType();
+            while(eventType != XmlPullParser.END_DOCUMENT){
 
-            NodeList nodlist = document.getElementsByTagName("Valute");
-
-            if (CurrencyList.valute[0] != null) CurrencyList.clear();
-            CurrencyList.add(new CurrencyBucket("RUB", 1, "Рубль"));
-
-            for (int i = 0; i < nodlist.getLength(); i++) {
-                Element element = (Element) nodlist.item(i);
-
-                NodeList nodlistCharCode = element.getElementsByTagName("CharCode");
-                Element _charCode = (Element) nodlistCharCode.item(0);
-
-
-                NodeList nodlistNominal = element.getElementsByTagName("Nominal");
-                Element _nominal = (Element) nodlistNominal.item(0);
-
-                NodeList nodlistName = element.getElementsByTagName("Name");
-                Element _name = (Element) nodlistName.item(0);
-
-                NodeList nodlistValue = element.getElementsByTagName("Value");
-                Element _value = (Element) nodlistValue.item(0);
-
-
-                String charCode = _charCode.getChildNodes().item(0).getNodeValue();
-                double value = Double.parseDouble(_value.getChildNodes().item(0).getNodeValue().replace(',', '.'));
-                double nominal = Double.parseDouble(_nominal.getChildNodes().item(0).getNodeValue().replace(',', '.'));
-                double resultValue = value/nominal;
-                String name = _name.getChildNodes().item(0).getNodeValue();
-
-                CurrencyBucket temp = new CurrencyBucket(charCode, resultValue, name);
-                CurrencyList.add(temp);
-
+                String tagName = xpp.getName();
+                switch (eventType){
+                    case XmlPullParser.START_TAG:
+                        if("user".equalsIgnoreCase(tagName)){
+                            inEntry = true;
+                            currentPost = new Post();
+                        }
+                        break;
+                    case XmlPullParser.TEXT:
+                        textValue = xpp.getText();
+                        break;
+                    case XmlPullParser.END_TAG:
+                        if(inEntry){
+                            if("Valute".equals(tagName)){
+                                posts.add(currentPost);
+                                inEntry = false;
+                            } else if("NumCode".equals(tagName)){
+                                currentPost.setNumCode(textValue);
+                            } else if("CharCode".equals(tagName)){
+                                currentPost.setCharCode(textValue);
+                            } else if("Nominal".equals(tagName)){
+                                currentPost.setNominal(textValue);
+                            } else if("Name".equals(tagName)){
+                                currentPost.setName(textValue);
+                            } else if("Value".equals(tagName)){
+                                currentPost.setValue(textValue);
+                            }
+                        }
+                        break;
+                    default:
+                }
+                eventType = xpp.next();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
+        catch (Exception e){
+            status = false;
+            e.printStackTrace();
+            Log.e("XMLParser", e.getMessage()); /////
+        }
+        return  status;
     }
 }

@@ -2,8 +2,7 @@ package ru.alexeysekatskiy.currencyconverter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,16 +10,18 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import org.simpleframework.xml.Path;
 
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Arrays;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,12 +33,44 @@ public class MainActivity extends AppCompatActivity {
     Button leftBtn;
     Button rightBtn;
     InputMethodManager manager;
+    ProgressBar progressBar;
+    ConstraintLayout mainLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getData();
+
+        progressBar = findViewById(R.id.progress);
+        mainLayout = findViewById(R.id.main_layout);/////
+
+        mainLayout.setVisibility(View.GONE); /////
+        progressBar.setVisibility(View.VISIBLE);
+
+        new Thread(new Runnable() {
+            public void run() {
+                try{
+                    String content = download("http://www.cbr.ru/scripts/XML_daily.asp");
+                    progressBar.post(new Runnable() {
+                        public void run() {
+                            XMLParser parser = new XMLParser();
+                            if(parser.parse(content)) {
+                                mainLayout.setVisibility(View.VISIBLE);
+                                progressBar.setVisibility(View.GONE);
+                            }
+                        }
+                    });
+                }
+                catch (IOException ex){
+                    Log.e("Main-download", Arrays.toString(ex.getStackTrace()));
+                    mainLayout.post(new Runnable() {
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }
+        }).start();
     }
 
     public void changeCurrencyRight(View view) {
@@ -64,44 +97,32 @@ public class MainActivity extends AppCompatActivity {
         return rightSide;
     }
 
-    private void getData() {
-        NetworkService.getInstance()
-                .getXmlApi()
-//                .getAllPost()
-//                .enqueue(new Callback<List<Post>>() {
-//                    @Override
-//                    public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-//                        if (response.isSuccessful()) {
-//                            Log.e("Main-INFO-SUCCES", String.valueOf(response.body().size()));
-//                            List<Post> postList = response.body();
-//                            for (Post post : postList) {
-//                                Log.e("Main-INFO", post.getName());
-//                                Log.e("Main-INFO", post.getValue());
-//                            }
-//                        } else {
-//                            Log.e("Main-INFO-DENIED", String.valueOf(response.code()));
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<List<Post>> call, Throwable t) {
-//                        Log.e("Main-EXCEPTION", t.getMessage());
-//                    }
-//                });
 
-                .getGeneralPost()
-                .enqueue(new Callback<Post>() {
-                    @Override
-                    public void onResponse(@NonNull Call<Post> call,@NonNull Response<Post> response) {
-                        Post post = response.body();
-                        Log.e("Main-INFO", post.getName());
-                        Log.e("Main-INFO", post.getValue());
-                    }
-
-                    @Override
-                    public void onFailure(Call<Post> call, Throwable t) {
-                        Log.e("Main-EXCEPTION", t.getMessage());
-                    }
-                });
+    private String download(String urlPath) throws IOException {
+        StringBuilder xmlResult = new StringBuilder();
+        BufferedReader reader = null;
+        InputStream stream = null;
+        HttpsURLConnection connection = null;
+        try {
+            URL url = new URL(urlPath);
+            connection = (HttpsURLConnection) url.openConnection();
+            stream = connection.getInputStream();
+            reader = new BufferedReader(new InputStreamReader(stream));
+            String line;
+            while ((line=reader.readLine()) != null) {
+                xmlResult.append(line);
+            }
+            return xmlResult.toString();
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
+            if (stream != null) {
+                stream.close();
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
     }
 }
