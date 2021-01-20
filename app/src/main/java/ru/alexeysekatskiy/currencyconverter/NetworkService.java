@@ -1,18 +1,22 @@
 package ru.alexeysekatskiy.currencyconverter;
 
+import org.simpleframework.xml.convert.AnnotationStrategy;
+import org.simpleframework.xml.core.Persister;
+
 import retrofit2.Retrofit;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 public class NetworkService {
     private static NetworkService mInstance;
-    private final static String BASE_URL = "http://www.cbr.ru";
+    private final static String BASE_URL = "https://www.cbr.ru";
     private Retrofit mRetrofit;
 
 
     private NetworkService() {
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(SimpleXmlConverterFactory.create())
+                .addConverterFactory(SimpleXmlConverterFactory.
+                        createNonStrict(new Persister(new AnnotationStrategy())))
                 .build();
     }
 

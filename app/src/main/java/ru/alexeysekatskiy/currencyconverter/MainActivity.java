@@ -2,6 +2,7 @@ package ru.alexeysekatskiy.currencyconverter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,15 +14,14 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HttpsURLConnection;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,44 +33,12 @@ public class MainActivity extends AppCompatActivity {
     Button leftBtn;
     Button rightBtn;
     InputMethodManager manager;
-    ProgressBar progressBar;
-    ConstraintLayout mainLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        progressBar = findViewById(R.id.progress);
-        mainLayout = findViewById(R.id.main_layout);/////
-
-        mainLayout.setVisibility(View.GONE); /////
-        progressBar.setVisibility(View.VISIBLE);
-
-        new Thread(new Runnable() {
-            public void run() {
-                try{
-                    String content = download("http://www.cbr.ru/scripts/XML_daily.asp");
-                    progressBar.post(new Runnable() {
-                        public void run() {
-                            XMLParser parser = new XMLParser();
-                            if(parser.parse(content)) {
-                                mainLayout.setVisibility(View.VISIBLE);
-                                progressBar.setVisibility(View.GONE);
-                            }
-                        }
-                    });
-                }
-                catch (IOException ex){
-                    Log.e("Main-download", Arrays.toString(ex.getStackTrace()));
-                    mainLayout.post(new Runnable() {
-                        public void run() {
-                            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
-            }
-        }).start();
+        getData();
     }
 
     public void changeCurrencyRight(View view) {
@@ -97,32 +65,35 @@ public class MainActivity extends AppCompatActivity {
         return rightSide;
     }
 
+    private void getData() {
+        NetworkService.getInstance()
+            .getXmlApi()
+            .getGeneralPost()
+            .enqueue(new Callback<Post>() {
+                @Override
+                public void onResponse(@NonNull Call<Post> call, @NonNull Response<Post> response) {
+                    Post post = response.body();
+                    if (response.isSuccessful()) {
+                        Log.e("MAIN-INFO", post.getElement().get(0).getName());
+                        Log.e("MAIN-INFO", post.getElement().get(1).getName());
+                        Toast.makeText(MainActivity.this, post.getElement().get(0).getName(), Toast.LENGTH_LONG).show();
 
-    private String download(String urlPath) throws IOException {
-        StringBuilder xmlResult = new StringBuilder();
-        BufferedReader reader = null;
-        InputStream stream = null;
-        HttpsURLConnection connection = null;
-        try {
-            URL url = new URL(urlPath);
-            connection = (HttpsURLConnection) url.openConnection();
-            stream = connection.getInputStream();
-            reader = new BufferedReader(new InputStreamReader(stream));
-            String line;
-            while ((line=reader.readLine()) != null) {
-                xmlResult.append(line);
-            }
-            return xmlResult.toString();
-        } finally {
-            if (reader != null) {
-                reader.close();
-            }
-            if (stream != null) {
-                stream.close();
-            }
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Post> call, Throwable t) {
+                    Log.e("Main-EXCEPTION", t.getMessage());
+                    Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"katorabian@gmail.com"});
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Код ошибки");
+                    intent.putExtra(Intent.EXTRA_TEXT, t.getMessage() + "\n" + Arrays.toString(t.getStackTrace()));
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
+                }
+            });
     }
 }
