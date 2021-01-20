@@ -24,7 +24,7 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements TextView.OnEditorActionListener {
 
-    private static boolean rightSide = false;
+    private static volatile boolean rightSide = false;
     static CurrencyBucket leftValute;
     static CurrencyBucket rightValute;
     EditText leftEdit;
@@ -84,8 +84,6 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
         }
     }
 
-
-
     public void changeCurrencyRight(View view) {
         rightSide = true;
         Intent intent = new Intent(MainActivity.this, CurrencySelectionDialog.class);
@@ -98,14 +96,34 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
         startActivity(intent);
     }
 
+    //TODO: Добавить форматирование текста
     public void swap(View view) {
-        Toast.makeText(getApplicationContext(), "Не реализовано", Toast.LENGTH_SHORT).show();
+        String bucketCharCode = leftValute.getCharCode();
+        leftValute = CurrencyList.get(rightValute.getCharCode());
+        rightValute = CurrencyList.get(bucketCharCode);
+
+        double tempValue = Double.parseDouble(leftEdit.getText().toString());
+        leftEdit.setText(rightEdit.getText());
+        rightEdit.setText(String.valueOf(tempValue));
+
+        leftBtn.setText(rightBtn.getText());
+        rightBtn.setText(bucketCharCode);
+
+        bucketCharCode = null;
     }
 
     public void hideKeyboard(View view) {
         manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        calculateValute();  ///////
+        calculateValute();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        leftBtn.setText(leftValute.getCharCode());
+        rightBtn.setText(rightValute.getCharCode());
+        calculateValute();
     }
 
     public static boolean isRightActivity() {
@@ -173,6 +191,7 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
         }
     }
 
+    //TODO: Не срабатывает поздсчет с закрытием клавиатуры. Сторона привязана к послежней btn или Done кнопке
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (v == leftEdit) {
@@ -184,10 +203,8 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
         if (actionId == EditorInfo.IME_ACTION_DONE) {
             manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             manager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-            calculateValute();
-        } else {
-            calculateValute();
         }
+        calculateValute();
 
         return true;
     }

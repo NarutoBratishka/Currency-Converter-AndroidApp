@@ -9,12 +9,12 @@ public class CurrencySelectionDialog extends AppCompatActivity {
 
     private RecyclerView currencyListView;
     private CurrencyAdapter adapter;
+    private static CurrencySelectionDialog current;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection_dialog);
-
 
         currencyListView = findViewById(R.id.currency_list_view);
 
@@ -25,5 +25,11 @@ public class CurrencySelectionDialog extends AppCompatActivity {
 
         adapter = new CurrencyAdapter();
         currencyListView.setAdapter(adapter);
+
+        current = this;
+    }
+
+    public static void exeFinish() {
+        current.finish();
     }
 }

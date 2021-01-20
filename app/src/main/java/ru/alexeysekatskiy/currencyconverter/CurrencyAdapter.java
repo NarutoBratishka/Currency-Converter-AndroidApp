@@ -57,6 +57,7 @@ public class CurrencyAdapter extends RecyclerView.Adapter<CurrencyAdapter.Curren
                     MainActivity.leftValute = CurrencyList.get(position);
                 }
 
+                CurrencySelectionDialog.exeFinish();
             });
         }
 
