@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 public class CurrencyList implements Iterable<CurrencyBucket> {
-    static int size = 0;
+    static volatile int size = 0;
     int iteratorIteration = 0;
     static CurrencyBucket[] valute = new CurrencyBucket[16];
 
