@@ -7,10 +7,13 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -19,7 +22,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TextView.OnEditorActionListener {
 
     private static boolean rightSide = false;
     static CurrencyBucket leftValute;
@@ -41,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
         rightBtn = findViewById(R.id.button_val_right);
         leftEdit = (EditText) findViewById(R.id.value_left);
         rightEdit = (EditText) findViewById(R.id.value_right);
+        leftEdit.setOnEditorActionListener(this);
+        rightEdit.setOnEditorActionListener(this);
 
     }
 
@@ -166,5 +171,24 @@ public class MainActivity extends AppCompatActivity {
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         }
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (v == leftEdit) {
+            rightSide = false;
+        } else if (v == rightEdit) {
+            rightSide = true;
+        }
+
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+            manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            manager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            calculateValute();
+        } else {
+            calculateValute();
+        }
+
+        return true;
     }
 }
