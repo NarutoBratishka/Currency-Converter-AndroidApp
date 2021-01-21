@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
     @SuppressLint("DefaultLocale")
     public void calculateValute() {
         if (!rightSide) {
-            double leftEditDigit = Double.parseDouble(String.valueOf(leftEdit.getText()));
+            double leftEditDigit = leftEdit.getText().toString().equals(".") ? 0 : Double.parseDouble(String.valueOf(leftEdit.getText()));
             double leftSum = leftValute.getValue() *
                     leftEditDigit;
 
@@ -60,14 +60,14 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
 
             try {
                 result = leftSum / rightValute.getValue();
-            } catch (ArithmeticException e) {
+            } catch (ArithmeticException | NumberFormatException e) {
                 result = 0.0;
             }
 
             rightEdit.setText(String.format("%.2f", result).replace(',', '.'));
             leftEdit.setText(String.format("%.2f", leftEditDigit).replace(',', '.'));
         } else {
-            double rightEditDigit = Double.parseDouble(String.valueOf(rightEdit.getText()));
+            double rightEditDigit = rightEdit.getText().toString().equals(".") ? 0 : Double.parseDouble(String.valueOf(rightEdit.getText()));
             double rightSum = rightValute.getValue() *
                     rightEditDigit;
 
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
 
             try {
                 result = rightSum / leftValute.getValue();
-            } catch (ArithmeticException e) {
+            } catch (ArithmeticException | NumberFormatException e) {
                 result = 0.0;
             }
 
@@ -96,15 +96,15 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
         startActivity(intent);
     }
 
-    //TODO: Добавить форматирование текста
+    @SuppressLint("DefaultLocale")
     public void swap(View view) {
         String bucketCharCode = leftValute.getCharCode();
         leftValute = CurrencyList.get(rightValute.getCharCode());
         rightValute = CurrencyList.get(bucketCharCode);
 
         double tempValue = Double.parseDouble(leftEdit.getText().toString());
-        leftEdit.setText(rightEdit.getText());
-        rightEdit.setText(String.valueOf(tempValue));
+        leftEdit.setText(String.format("%.2f", Double.parseDouble(rightEdit.getText().toString())).replace(',', '.'));
+        rightEdit.setText(String.format("%.2f", tempValue).replace(',', '.'));
 
         leftBtn.setText(rightBtn.getText());
         rightBtn.setText(bucketCharCode);
