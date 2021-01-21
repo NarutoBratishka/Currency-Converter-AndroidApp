@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -22,7 +24,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements TextView.OnEditorActionListener {
+public class MainActivity extends AppCompatActivity {
 
     private static volatile boolean rightSide = false;
     static CurrencyBucket leftValute;
@@ -32,8 +34,9 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
     Button leftBtn;
     Button rightBtn;
     InputMethodManager manager;
-    volatile int listLength;
 
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,17 +45,31 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
 
         leftBtn = findViewById(R.id.button_val_left);
         rightBtn = findViewById(R.id.button_val_right);
-        leftEdit = (EditText) findViewById(R.id.value_left);
-        rightEdit = (EditText) findViewById(R.id.value_right);
-        leftEdit.setOnEditorActionListener(this);
-        rightEdit.setOnEditorActionListener(this);
-
+        leftEdit = findViewById(R.id.value_left);
+        rightEdit = findViewById(R.id.value_right);
+        rightEdit.addTextChangedListener(new EditTextListener() {
+            @Override
+            protected void onTextChanged(String before, String old, String aNew, String after) {
+                startUpdates();
+                calculate(rightSide);
+                endUpdates();
+            }
+        });
+        leftEdit.addTextChangedListener(new EditTextListener() {
+            @Override
+            protected void onTextChanged(String before, String old, String aNew, String after) {
+                startUpdates();
+                calculate(rightSide);
+                endUpdates();
+            }
+        });
     }
 
+
     @SuppressLint("DefaultLocale")
-    public void calculateValute() {
-        if (!rightSide) {
-            double leftEditDigit = leftEdit.getText().toString().equals(".") ? 0 : Double.parseDouble(String.valueOf(leftEdit.getText()));
+    public void calculate(boolean side) {
+        if (!side) {
+            double leftEditDigit = leftEdit.getText().toString().equals(".") | leftEdit.getText().toString().equals("") ? 0 : Double.parseDouble(String.valueOf(leftEdit.getText()));
             double leftSum = leftValute.getValue() *
                     leftEditDigit;
 
@@ -65,9 +82,9 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
             }
 
             rightEdit.setText(String.format("%.2f", result).replace(',', '.'));
-            leftEdit.setText(String.format("%.2f", leftEditDigit).replace(',', '.'));
+//            leftEdit.setText(String.format("%.2f", leftEditDigit).replace(',', '.'));
         } else {
-            double rightEditDigit = rightEdit.getText().toString().equals(".") ? 0 : Double.parseDouble(String.valueOf(rightEdit.getText()));
+            double rightEditDigit = rightEdit.getText().toString().equals(".") | rightEdit.getText().toString().equals("") ? 0 : Double.parseDouble(String.valueOf(rightEdit.getText()));
             double rightSum = rightValute.getValue() *
                     rightEditDigit;
 
@@ -80,9 +97,21 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
             }
 
             leftEdit.setText(String.format("%.2f", result).replace(',', '.'));
-            rightEdit.setText(String.format("%.2f", rightEditDigit).replace(',', '.'));
+//            rightEdit.setText(String.format("%.2f", rightEditDigit).replace(',', '.'));
         }
     }
+
+
+    public void setSideForRight(View v) {
+        rightSide = true;
+//        rightEdit.setSelection(rightEdit.getText().length());
+    }
+
+    public void setSideForLeft(View v) {
+        rightSide = false;
+//        leftEdit.setSelection(leftEdit.getText().length());
+    }
+
 
     public void changeCurrencyRight(View view) {
         rightSide = true;
@@ -90,11 +119,13 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
         startActivity(intent);
     }
 
+
     public void changeCurrencyLeft(View view) {
         rightSide = false;
         Intent intent = new Intent(MainActivity.this, CurrencySelectionDialog.class);
         startActivity(intent);
     }
+
 
     @SuppressLint("DefaultLocale")
     public void swap(View view) {
@@ -112,23 +143,27 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
         bucketCharCode = null;
     }
 
+
     public void hideKeyboard(View view) {
         manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        calculateValute();
+        calculate(rightSide);
     }
+
 
     @Override
     protected void onRestart() {
         super.onRestart();
         leftBtn.setText(leftValute.getCharCode());
         rightBtn.setText(rightValute.getCharCode());
-        calculateValute();
+        calculate(rightSide);
     }
+
 
     public static boolean isRightActivity() {
         return rightSide;
     }
+
 
     private void getData() {
         NetworkService.getInstance()
@@ -139,13 +174,11 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
                 public void onResponse(@NonNull Call<Post> call, @NonNull Response<Post> response) {
                     Post post = response.body();
                     if (response.isSuccessful()) {
-                        listLength = post.getElement().size();
                         fillCurrencyList(post);
-//                        Toast.makeText(MainActivity.this, post.getElement().get(0).getName(), Toast.LENGTH_LONG).show(); /////
 
                         leftValute = CurrencyList.get("USD");
                         rightValute = CurrencyList.get("RUB");
-                        calculateValute();
+                        calculate(rightSide);
                     }
                 }
 
@@ -189,23 +222,5 @@ public class MainActivity extends AppCompatActivity implements TextView.OnEditor
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         }
-    }
-
-    //TODO: Не срабатывает поздсчет с закрытием клавиатуры. Сторона привязана к послежней btn или Done кнопке
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if (v == leftEdit) {
-            rightSide = false;
-        } else if (v == rightEdit) {
-            rightSide = true;
-        }
-
-        if (actionId == EditorInfo.IME_ACTION_DONE) {
-            manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            manager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-        }
-        calculateValute();
-
-        return true;
     }
 }
